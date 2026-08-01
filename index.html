@@ -1,5 +1,22 @@
 <!DOCTYPE html>
-<html>
-<head><title>Stellarrite</title></head>
-<body><h1>Hello, Stellarrite</h1></body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stellarrite</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <h1>Stellarrite</h1>
+  <p id="status">Connecting to Firebase...</p>
+
+  <script type="module">
+    import { onAuthReady } from "./js/firebase-config.js";
+
+    onAuthReady((user) => {
+      document.getElementById("status").textContent =
+        "Connected! Your anonymous user ID: " + user.uid;
+    });
+  </script>
+</body>
 </html>
