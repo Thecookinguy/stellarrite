@@ -5,17 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stellarrite</title>
   <link rel="stylesheet" href="css/main.css" />
+  <!-- PeerJS library (handles WebRTC + free public signaling) -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
   <h1>Stellarrite</h1>
   <p id="status">Connecting to Firebase...</p>
 
+  <div id="voice-panel" style="display:none;">
+    <p id="room-link"></p>
+    <button id="join-btn">Join Voice Call</button>
+    <button id="leave-btn" style="display:none;">Leave Call</button>
+    <button id="mute-btn" style="display:none;">Mute</button>
+    <h3>In this room:</h3>
+    <ul id="participant-list"></ul>
+  </div>
+
   <script type="module">
     import { onAuthReady } from "./js/firebase-config.js";
+    import {
+      roomId, joinCall, leaveCall, toggleMute,
+      setParticipantsListener, setJoinedListener
+    } from "./js/voice.js";
+
+    const statusEl = document.getElementById("status");
+    const voicePanel = document.getElementById("voice-panel");
+    const roomLinkEl = document.getElementById("room-link");
+    const joinBtn = document.getElementById("join-btn");
+    const leaveBtn = document.getElementById("leave-btn");
+    const muteBtn = document.getElementById("mute-btn");
+    const participantList = document.getElementById("participant-list");
 
     onAuthReady((user) => {
-      document.getElementById("status").textContent =
-        "Connected! Your anonymous user ID: " + user.uid;
+      statusEl.textContent = "Connected! Your ID: " + user.uid;
+      voicePanel.style.display = "block";
+      roomLinkEl.textContent = "Room link: " + window.location.href;
+    });
+
+    joinBtn.addEventListener("click", () => joinCall());
+    leaveBtn.addEventListener("click", () => leaveCall());
+    muteBtn.addEventListener("click", () => {
+      const enabled = toggleMute();
+      muteBtn.textContent = enabled ? "Mute" : "Unmute";
+    });
+
+    setJoinedListener((joined) => {
+      joinBtn.style.display = joined ? "none" : "inline-block";
+      leaveBtn.style.display = joined ? "inline-block" : "none";
+      muteBtn.style.display = joined ? "inline-block" : "none";
+    });
+
+    setParticipantsListener((uids) => {
+      participantList.innerHTML = "";
+      uids.forEach((uid) => {
+        const li = document.createElement("li");
+        li.textContent = uid;
+        participantList.appendChild(li);
+      });
     });
   </script>
 </body>
